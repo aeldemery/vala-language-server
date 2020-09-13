@@ -145,12 +145,9 @@ class Vls.MesonProject : Project {
 
                 debug ("MesonProject: file does not exist, fallback to %s", command_str);
 
-                Process.spawn_sync (
+                Workarounds.spawn_sync (
                     build_dir,
                     spawn_args,
-                    null,
-                    SpawnFlags.SEARCH_PATH,
-                    null,
                     out proc_stdout,
                     out proc_stderr,
                     out proc_status);
@@ -181,12 +178,9 @@ class Vls.MesonProject : Project {
         string meson_version_proc_stdout, meson_version_proc_stderr;
         int meson_version_proc_status;
 
-        Process.spawn_sync (
+        Workarounds.spawn_sync (
             build_dir,
             "meson --version".split (" "),
-            null,
-            SpawnFlags.SEARCH_PATH,
-            null,
             out meson_version_proc_stdout,
             out meson_version_proc_stderr,
             out meson_version_proc_status);
@@ -219,12 +213,9 @@ class Vls.MesonProject : Project {
         debug ("MesonProject: %sconfiguring build dir %s ...", configured_once ? "re" : "", build_dir);
         if (configured_once)
             spawn_args += "--reconfigure";
-        Process.spawn_sync (
+        Workarounds.spawn_sync (
             build_dir,
             spawn_args, 
-            null, 
-            SpawnFlags.SEARCH_PATH, 
-            null,
             out proc_stdout,
             out proc_stderr,
             out proc_status);

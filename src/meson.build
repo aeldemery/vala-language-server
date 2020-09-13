@@ -25,17 +25,20 @@ vls_src = files([
   'servertypes.vala',
 ])
 
+vala_args = []
+
 if get_option('parse_system_girs')
   vls_src += 'documentation/girdocumentation.vala'
-  add_project_arguments(['--define=PARSE_SYSTEM_GIRS'], language: 'vala')
+  vala_args += ['--define=PARSE_SYSTEM_GIRS']
 endif
 
 if get_option('active_parameter')
-  add_project_arguments(['--define=VALA_FEATURE_INITIAL_ARGUMENT_COUNT'], language: 'vala')
+  vala_args += ['--define=VALA_FEATURE_INITIAL_ARGUMENT_COUNT']
 endif
 
 executable('vala-language-server',
   dependencies: deps,
   sources: [vls_src, conf_file, extra_vala_sources],
   c_args: ['-DG_LOG_DOMAIN="vls"'],
+  vala_args: vala_args,
   install: true)
