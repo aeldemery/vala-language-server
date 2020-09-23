@@ -140,6 +140,18 @@ class Vls.SymbolExtractor : Object {
         }
     }
 
+    class FakeCastExpr : FakeExpr {
+        public FakeMemberAccess type_expr { get; private set; }
+
+        public FakeCastExpr (FakeExpr expr, FakeMemberAccess type_expr) {
+            base (expr);
+        }
+
+        public override string to_string () {
+            return @"($type_expr) $inner";
+        }
+    }
+
     private long idx;
     private Position pos;
     public Vala.Symbol block { get; private set; }
@@ -660,7 +672,10 @@ class Vls.SymbolExtractor : Object {
         skip_whitespace ();
         FakeExpr? arg = null;
         while ((arg = parse_fake_expr (true)) != null) {
-            // TODO: parse cast expressions here
+            // parse cast expressions of the form ((type) arg)
+            var cast_type = parse_fake_cast_type_expr ();
+            if (cast_type != null)
+                arg = new FakeCastExpr (arg, cast_type);
             expressions.insert (0, arg);
             skip_whitespace ();
             if (!(arg is FakeObjectCreationExpr)) {
@@ -701,6 +716,26 @@ class Vls.SymbolExtractor : Object {
         }
 
         return type_arguments;
+    }
+
+    private FakeMemberAccess? parse_fake_cast_type_expr () {
+        FakeMemberAccess? ma_expr = null;
+        long saved_idx = this.idx;
+
+        if (!skip_char (')'))
+            return null;
+        
+        if ((ma_expr = parse_fake_member_access_expr (false)) == null) {
+            this.idx = saved_idx;
+            return null;
+        }
+
+        if (!skip_char ('(')) {
+            this.idx = saved_idx;
+            return null;
+        }
+
+        return ma_expr;
     }
 
     private FakeMemberAccess? parse_fake_member_access_expr (bool allow_inner_exprs = true) {
